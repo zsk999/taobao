@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title></title>
+    <script src="js/mui.min.js"></script>
+    <link href="css/mui.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/index.css">
+    <script type="text/javascript" charset="utf-8">
+        mui.init();
+    </script>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="nav">
+                <div class="ipt"><input type="text"></div>
+                <div class="mui-icon mui-icon-gear"></div>
+            </div>
+            <div class="banner">
+                <ul class="lef">
+                    <li class="ban">综合排序</li>
+                    <li data-class="some" class="some">销量优先</li>
+                    <li>筛选</li>
+                </ul>
+                <div class="mui-icon mui-icon-list"></div>
+            </div>
+            <ul class="banbox">
+                <li class="active" data-class="nmobl">综合排序</li>
+                <li data-class="min">价格从低到高</li>
+                <li data-class="max">价格从高到低</li>
+                <li data-class="info">信誉排序</li>
+            </ul>
+        </header>
+        <footer>
+            <div class="cont" id=banshow>
+                <div class="prev">下拉刷新</div>
+                <div class="content">
+                    <!-- 渲染 -->
+                </div>
+                <div class="next">上拉加载</div>
+            </div>
+            <div class="banshow"></div>
+        </footer>
+    </div>
+</body>
+<script src="./js/better-scroll.js"></script>
+<script>
+    var ipt = document.querySelector('.ipt input');
+    var BScroll = new BScroll('footer');
+    document.querySelector('.ban').addEventListener('tap', function() { //点击排序按钮
+        document.querySelector('.banbox').style.display = "block";
+        document.querySelector('.banshow').style.display = "block";
+    })
+    document.querySelector('footer').addEventListener('tap', function() { //点击footer任意位置隐藏折叠面板
+        document.querySelector('.banbox').style.display = "none";
+        document.querySelector('.banshow').style.display = "none";
+    })
+    document.querySelectorAll('.banbox li').forEach(function(item) { //高亮显示排序列表
+        item.addEventListener('tap', function() {
+            document.querySelectorAll('.banbox li').forEach(function(items) { //循环隐藏color样式
+                items.className = "";
+            })
+            this.className = "active";
+            document.querySelector('.ban').innerHTML = this.innerHTML;
+            sort(this.dataset.class);
+            document.querySelector('.banbox').style.display = "none";
+            document.querySelector('.banshow').style.display = "none";
+        })
+    })
+    document.querySelector('.some').addEventListener('tap', function() { //点击销量按钮
+        sort(this.dataset.class);
+    });
+
+    sort("nmobl");
+    //排序方法封装
+    function sort(num) {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function(res) {
+            var date = JSON.parse(res.target.responseText);
+            var str = "";
+            date.forEach(function(item, index) {
+                str += ` <dl>
+                    <dt><img src="./${item.img}" alt=""></dt>
+                    <dd>
+                        <p>${item.title}</p>
+                        <p><span>${item.money}</span><span>${item.outmoney}</span></p>
+                        <p><span>${item.add}</span><span>${item.num}</span><span>${item.list}</span></p>
+                    </dd>
+                </dl>`;
+            });
+            document.querySelector('.content').innerHTML = str;
+        }
+        xhr.open('get', `/sortlist?data=${num}&search=${ipt.value}`);
+        xhr.send('');
+    }
+</script>
+
+</html>
